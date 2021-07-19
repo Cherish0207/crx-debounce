@@ -21,14 +21,14 @@ function throttle(callback, time, immediate) {
     if (immediate) {
       // 马上触发一次，下一下等一秒，利用时间戳
       if (!timer || Date.now() - timer > time) {
-        callback.apply(null, arguments);
+        callback.apply(this, arguments);
         timer = Date.now();
       }
     } else {
       // 等时间到了执行第一次
       if (timer1) return;
       timer1 = setTimeout(() => {
-        callback.apply(null, arguments);
+        callback.apply(this, arguments);
         timer1 = null;
       }, time);
     }
@@ -38,3 +38,11 @@ function throttle(callback, time, immediate) {
 for (let i = 0; i < 1000; i++) {
   // handler(i); // 连续调用handle函数，在1000毫秒内也只会执行一次。
 }
+const obj = {
+  handle: throttle(function (e) {
+    console.log(e, this.myname);
+  }),
+  myname: "cherish",
+};
+obj.handle(1);
+obj.handle(2);

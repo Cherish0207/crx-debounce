@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>throttle</title>
+    <style>
+      button {
+        width: 200px;
+        height: 50px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="btn">快速点击时，1s内的点击算一次</button>
+    <script>
+      function throttle(func, wait) {
+        let previous = 0;
+        return function () {
+          console.log("throttle");
+          let now = Date.now();
+          if (now - previous > wait) {
+            func.apply(this, arguments);
+            previous = now;
+          }
+        };
+      }
+      function logger() {
+        console.log("logger");
+      }
+      btn.addEventListener("click", throttle(logger, 1000));
+    </script>
+  </body>
+</html>
