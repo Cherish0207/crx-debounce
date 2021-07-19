@@ -18,12 +18,11 @@ function throttle(callback, time) {
   let timer;
   return function () {
     console.log("throttle");
-    // 等时间到了执行第一次
-    if (timer) return;
-    timer = setTimeout(() => {
+    // 马上触发一次，下一下等一秒，利用时间戳
+    if (!timer || Date.now() - timer > time) {
       callback.apply(null, arguments);
-      timer = null;
-    }, time);
+      timer = Date.now();
+    }
   };
 }
 
