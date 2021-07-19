@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie = edge" />
+    <title>debounce</title>
+    <style>
+      div {
+        background: yellow;
+        color: red;
+        width: 100px;
+        height: 40px;
+        border: 1px solid red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="btn">点击</div>
+    <script>
+      function debounce(func, time, immediate) {
+        let timer;
+        return function () {
+          console.log("debounce");
+          clearTimeout(timer);
+          if (immediate) {
+            if (!timer) func.apply(this, arguments);
+          }
+          timer = setTimeout(() => {
+            func.apply(this, arguments);
+            timer = null;
+          }, time);
+        };
+      }
+      function logger(e) {
+        console.log("logger", e);
+      }
+      btn.addEventListener("click", debounce(logger, 1000, true));
+      window.onresize=debounce(logger, 1000, true)
+    </script>
+  </body>
+</html>
