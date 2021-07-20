@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>throttle</title>
+  </head>
+  <body>
+    <button id="btn">click</button>
+    <script>
+      // 第一步,实现简单的截流---首次点击触发,最后一次点击可能不被触发
+      // 第二部,最后一次点击等待time后触发---trailing
+      // 第三部,第一次不执行
+      function throttle(fn, time, { leading, trailing } = {}) {
+        let context,
+          args,
+          previous = 0,
+          timer;
+        return function () {
+          console.log("throttle");
+          context = this;
+          args = arguments;
+          let later = function () {
+            fn.apply(context, args);
+            previous = 0;
+            clearTimeout(timer);
+            timer = null;
+          };
+          let now = Date.now();
+          previous = !previous && leading === false ? now : previous;
+          let remaining = time - (now - previous);
+          if (remaining <= 0) {
+            fn.apply(context, args);
+            previous = now;
+            clearTimeout(timer);
+            timer = null;
+          } else if (trailing !== false) {
+            clearTimeout(timer);
+            timer = setTimeout(later, remaining);
+          }
+        };
+      }
+      btn.onclick = throttle(
+        () => {
+          console.log("click");
+        },
+        1000,
+        { leading: false }
+      );
+    </script>
+  </body>
+</html>

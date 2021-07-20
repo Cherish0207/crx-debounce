@@ -19,15 +19,16 @@
       // underscore
       /**
        * 最后的点击可能没有生效 ---> trailing: true 最后一次等待wait后触发,默认触发
+       * 立即执行一次 ---> leading: true (leading: false 时第一次不执行)
        */
-      function throttle(func, wait, { trailing } = {}) {
+      function throttle(func, wait, { leading, trailing } = {}) {
         let previous = 0,
           args,
           context,
           timeout;
         // later: 最后一次执行的方法
         let later = function () {
-          previous = Date.now();
+          previous = leading === false ? 0 : Date.now();
           func.apply(context, args);
           timeout = null;
         };
@@ -36,6 +37,7 @@
           let now = Date.now();
           args = arguments;
           context = this;
+          if (!previous && leading === false) previous = now; // leading === false时,设置第一次(previous为0) 不执行
           let remaning = wait - (now - previous);
           if (remaning <= 0) {
             if (timeout) {
@@ -52,7 +54,7 @@
       function logger() {
         console.log("logger");
       }
-      btn.addEventListener("click", throttle(logger, 1000));
+      btn.addEventListener("click", throttle(logger, 1000, { leading: false }));
     </script>
   </body>
 </html>
