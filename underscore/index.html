@@ -18,12 +18,19 @@
     <script>
       // underscore
       /**
-       * 最后的点击可能没有生效 ---> trailing: true 最后一次等待wait后触发
+       * 最后的点击可能没有生效 ---> trailing: true 最后一次等待wait后触发,默认触发
        */
-      function throttle(func, wait) {
+      function throttle(func, wait, { trailing } = {}) {
         let previous = 0,
           args,
-          context;
+          context,
+          timeout;
+        // later: 最后一次执行的方法
+        let later = function () {
+          previous = Date.now();
+          func.apply(context, args);
+          timeout = null;
+        };
         return function () {
           console.log("throttle");
           let now = Date.now();
@@ -31,8 +38,14 @@
           context = this;
           let remaning = wait - (now - previous);
           if (remaning <= 0) {
+            if (timeout) {
+              clearTimeout(timeout);
+              timeout = null;
+            }
             func.apply(context, args);
             previous = now;
+          } else if (!timeout && trailing !== false) {
+            timeout = setTimeout(later, remaning);
           }
         };
       }
