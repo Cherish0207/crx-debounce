@@ -37,7 +37,8 @@
         console.log("logger", e);
       }
       btn.addEventListener("click", debounce(logger, 1000, true));
-      window.onresize=debounce(logger, 1000, true)
+      window.onresize = debounce(logger, 1000, true);
+      // bug:如果用户只点击了一次,logger执行两次
     </script>
   </body>
 </html>

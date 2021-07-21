@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie = edge" />
+    <title>debounce & throttle</title>
+    <style>
+      button {
+        width: 200px;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="btn">快速点击时，1s内的点击算一次</button>
+    <script>
+      /**
+       * 防抖和截流,loadash 都是通过定时器实现的
+       * 这里的debounce不同于之前,而是上来先开一个定时器.
+       * 一直点击期间,只刷新lastCallTime,当定时器到时间了,通过shouldInvoke判断lastCallTime差值结果不需要执行,重新开定时器
+       * 停止点击,定时器到时间执行最后一个定时器
+       */
+      function debounce(func, wait, { leading, trailing } = {}) {
+        let lastCallTime; // 最后调用的时间(previous)
+        let timeout;
+        let lastThis; // context
+        let lastArgs; // args
+        let remainingWait = function (now) {
+          return wait - (now - lastCallTime);
+        };
+        // shouldInvoke: 判断当前的debounce是否需要执行,是否应该调用
+        let shouldInvoke = function (now) {
+          return (
+            lastCallTime === undefined /* 第一次 */ || remainingWait(now) <= 0
+          );
+        };
+        let startTimer = function (timerExpired, wait) {
+          timeout = setTimeout(timerExpired, wait);
+        };
+        let invokeFunc = function () {
+          func.apply(lastThis, lastArgs);
+        };
+        let trailingEdge = function () {
+          timeout = undefined;
+          if (trailing !== false) invokeFunc();
+        };
+        // 当前定时器到时间了,是否需要执行这个函数,如果需要调用,触发结束的方法
+        let timerExpired = function () {
+          let now = Date.now();
+          if (shouldInvoke(now)) return trailingEdge();
+          console.log("没到时间,设置下一个定时器...");
+          startTimer(timerExpired, remainingWait(now));
+        };
+        /**
+         * 首次点击
+         * 1. 第一次是否执行(leading),需要执行就调用函数
+         * 2. 开启定时器,看下一次定时器到了,是否需要执行func
+         */
+        let leadingEdge = function (time) {
+          if (leading !== false) invokeFunc(time);
+          startTimer(timerExpired, wait);
+        };
+        return function () {
+          lastThis = this;
+          lastArgs = arguments;
+          let now = Date.now();
+          let isInvoking = shouldInvoke(now);
+          lastCallTime = now;
+          if (isInvoking && timeout === undefined) {
+            console.log("首次调用...");
+            leadingEdge(now);
+          }
+        };
+      }
+      function logger(e) {
+        console.log("logger", e);
+      }
+      btn.addEventListener("click", debounce(logger, 1000, false));
+    </script>
+  </body>
+</html>
