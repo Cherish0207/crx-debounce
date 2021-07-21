@@ -21,34 +21,39 @@
        * 一直点击期间,只刷新lastCallTime,当定时器到时间了,通过shouldInvoke判断lastCallTime差值结果不需要执行,重新开定时器
        * 停止点击,定时器到时间执行最后一个定时器
        */
-      function debounce(func, wait, { leading, trailing } = {}) {
+      // maxWait最大的点击时间
+      function debounce(func, wait, { leading, trailing, maxWait } = {}) {
         let lastCallTime; // 最后调用的时间(previous)
         let timeout;
         let lastThis; // context
         let lastArgs; // args
+        let lastInvokeTime; // 最终函数调用时间
         let remainingWait = function (now) {
           return wait - (now - lastCallTime);
         };
         // shouldInvoke: 判断当前的debounce是否需要执行,是否应该调用
         let shouldInvoke = function (now) {
           return (
-            lastCallTime === undefined /* 第一次 */ || remainingWait(now) <= 0
+            lastCallTime === undefined /* 第一次 */ ||
+            remainingWait(now) <= 0 ||
+            now - lastInvokeTime >= maxWait
           );
         };
         let startTimer = function (timerExpired, wait) {
           timeout = setTimeout(timerExpired, wait);
         };
-        let invokeFunc = function () {
+        let invokeFunc = function (time) {
+          lastInvokeTime = time;
           func.apply(lastThis, lastArgs);
         };
-        let trailingEdge = function () {
+        let trailingEdge = function (time) {
           timeout = undefined;
-          if (trailing !== false) invokeFunc();
+          if (trailing !== false) invokeFunc(time);
         };
         // 当前定时器到时间了,是否需要执行这个函数,如果需要调用,触发结束的方法
         let timerExpired = function () {
           let now = Date.now();
-          if (shouldInvoke(now)) return trailingEdge();
+          if (shouldInvoke(now)) return trailingEdge(now);
           console.log("没到时间,设置下一个定时器...");
           startTimer(timerExpired, remainingWait(now));
         };
@@ -68,15 +73,20 @@
           let isInvoking = shouldInvoke(now);
           lastCallTime = now;
           if (isInvoking && timeout === undefined) {
-            console.log("首次调用...");
             leadingEdge(now);
           }
         };
       }
+      function throttle(func, wait) {
+        return debounce(func, wait, {
+          maxWait: wait,
+        });
+      }
       function logger(e) {
         console.log("logger", e);
       }
-      btn.addEventListener("click", debounce(logger, 1000, false));
+      // btn.addEventListener("click", debounce(logger, 1000, false));
+      btn.addEventListener("click", throttle(logger, 1000, false));
     </script>
   </body>
 </html>
