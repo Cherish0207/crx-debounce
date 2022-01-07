@@ -1,5 +1,6 @@
 // 函数防抖:debounce
-// 应用于频繁触发事件的场景：比如搜索框实时发请求， onmousemove, resize, onscroll等等
+// 应用于 频繁触发事件 的场景：比如搜索框实时发请求， onmousemove, resize, onscroll等等
+// 消除  多次频繁触发 的影响, 连续触发, 在某个时间段内只会给出一个返回结果
 window.onresize = debounce((e) => {
   console.log("onresize", e);
 }, 1000, true);
